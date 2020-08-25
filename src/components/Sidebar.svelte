@@ -1,32 +1,34 @@
 <script>
-    import {nodes} from '../models/nodes/state'
-    import Store from './nodes/Store.svelte'
-    import Event from './nodes/Event.svelte'
+  import {nodes} from '../models/nodes/state'
+  import Store from './nodes/Store.svelte'
+  import Event from './nodes/Event.svelte'
+  import Component from './nodes/Component.svelte'
+  import Module from './nodes/Module.svelte'
 
 
-    let nodeList = Object.values($nodes)
+  let nodeList = Object.values($nodes)
 </script>
 
 <aside>
-    <div>
-        {#each nodeList as node}
-            {#if node.type === 'store'}
-                <Store />
-            {:else if node.type === 'event'}
-                <Event />
-            {/if}
-        {/each}
-    </div>
+    <div class="sub-group">Effector</div>
+    <Store />
+    <Event />
+
+    <div class="sub-group">Structure</div>
+    <Component />
+    <Module />
 </aside>
 
 <style>
     aside {
         flex: 0 0 100px;
-        height: calc(100% - var(--line-height) * 2);
-        border: 1px solid red;
+        /*height: calc(100% - var(--line-height) * 2);*/
+        border-right: 1px solid lightgray;
         box-sizing: border-box;
+        box-shadow: 2px 0 10px lightgray;
     }
-
-    @media (min-width: 640px) {
+    .sub-group {
+        font-size: .8em;
+        margin: 5px;
     }
 </style>

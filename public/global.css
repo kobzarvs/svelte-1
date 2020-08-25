@@ -5,6 +5,7 @@
 html, body {
     user-select: none;
     -webkit-user-select: none;
+    font-size: 16px;
 }
 
 body {

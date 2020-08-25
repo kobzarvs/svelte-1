@@ -2,10 +2,10 @@
   import Node from './Node.svelte'
 </script>
 
-
 <Node
-  type="store"
-  name="Store"
-  fill="cornflowerblue"
+  type="component"
+  name="Component"
+  fill="#edf4f6"
+  color="#333"
   {...$$restProps}
 />
