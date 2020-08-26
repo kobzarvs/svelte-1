@@ -19,7 +19,7 @@
     color: 'white',
     fill: 'transparent',
     size: {width: 100, height: 50},
-    location: {x: 0, y: 0}
+    location: {x: 0, y: 0},
   }
   let {location, size, id, type, name, color, fill} = {...defaultProps, ...node}
   console.log(node)
@@ -91,6 +91,27 @@
     updateNode({...node, name})
   }
 
+  let scx, scy, dcx, dcy, connecting = false
+
+  function startConnect(e) {
+    connecting = true
+    scx = dcx = e.offsetX
+    scy = dcy = e.offsetY
+    window.addEventListener('mousemove', moveConnect)
+    window.addEventListener('mouseup', endConnect)
+  }
+
+  function moveConnect(e) {
+    dcx = e.offsetX
+    dcy = e.offsetY
+  }
+
+  function endConnect(e) {
+    connecting = false
+    window.removeEventListener('mousemove', moveConnect)
+    window.removeEventListener('mouseup', endConnect)
+  }
+
 </script>
 
 {#if mode === 'dom'}
@@ -139,7 +160,28 @@
           y2={bound.top+ textHeight + padding}
           stroke={color}
         />
+        <circle
+          cx={bound.right - padding}
+          cy={bound.top + padding}
+          r={padding}
+          stroke="white"
+          fill="green"
+          class="node-output"
+          on:mousedown|stopPropagation={startConnect}
+        />
     </g>
+
+    {#if connecting}
+        <line
+          x1={scx}
+          y1={scy}
+          x2={dcx}
+          y2={dcy}
+          stroke="mediumseagreen"
+          fill="white"
+          stroke-width="4"
+        />
+    {/if}
 
     {#if inputNameMode}
         <foreignObject
@@ -187,4 +229,10 @@
     background: transparent;
     font-family: monospace;
   }
+
+  .node-output:hover {
+    fill: mediumseagreen;
+    cursor: crosshair;
+  }
+
 </style>
