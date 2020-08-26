@@ -1,12 +1,8 @@
 <script>
-  import {nodes} from '../models/nodes/state'
   import Store from './nodes/Store.svelte'
   import Event from './nodes/Event.svelte'
   import Component from './nodes/Component.svelte'
   import Module from './nodes/Module.svelte'
-
-
-  let nodeList = Object.values($nodes)
 </script>
 
 <aside>
@@ -22,7 +18,6 @@
 <style>
     aside {
         flex: 0 0 100px;
-        /*height: calc(100% - var(--line-height) * 2);*/
         border-right: 1px solid lightgray;
         box-sizing: border-box;
         box-shadow: 2px 0 10px lightgray;
