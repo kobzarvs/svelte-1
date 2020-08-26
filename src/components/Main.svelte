@@ -18,19 +18,7 @@
 
   let main
   let size = $svgSize
-  let over = false
-  $: nodeList = Object.values($model)
-
-  function handleDragEnter(e) {
-    over = true
-  }
-
-  function handleDragLeave(e) {
-    over = false
-  }
-
   function handleDrop(e) {
-    over = false
     drop({
       x: e.offsetX - $selectedNode.location.x,
       y: e.offsetY - $selectedNode.location.y,
@@ -39,22 +27,17 @@
 </script>
 
 <main
-  class:over
   bind:this={main}
-  on:dragenter={handleDragEnter}
-  on:dragleave={handleDragLeave}
   on:dragover|preventDefault
   on:drop={handleDrop}
   use:pannable
 >
     <svg class="main-svg" {...size}>
-        {#each nodeList as node}
+        {#each Object.values($model) as node (node)}
             <svelte:component
-              id={node.id}
-              key={node.id}
               this={components[node.type]}
               mode="svg"
-              location={node.location}
+              node={node}
             />
         {/each}
     </svg>
@@ -67,11 +50,6 @@
         box-sizing: border-box;
         overflow: auto;
         border: 1px solid transparent;
-    }
-
-    .over {
-        border: 1px solid blue;
-        z-index: 11;
     }
 
     .main-svg {

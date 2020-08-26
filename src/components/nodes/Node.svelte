@@ -1,39 +1,43 @@
 <script>
-  import { tick } from 'svelte'
+  import {tick} from 'svelte'
   import {endDrag, startDrag, selectNode} from '../../models/view'
   import {dropStatus} from '../../models/view/state'
+  import {updateNode} from '../../models/model'
 
 
-  export let id
-  export let type
-  export let name
-  export let color = 'white'
-  export let fill
-  export let location = {x: 0, y: 0}
-  export let size = {width: 100, height: 50}
+  // export let type
+  // export let name
+  // export let color = 'white'
+  // export let fill = 'transparent'
+  // export let location = {x: 0, y: 0}
+  // export let size = {width: 100, height: 50}
   export let mode = 'dom'
-
-  let currentNode = {
-    type,
-    name,
-    color,
-    fill,
-    location: {x: 0, y: 0},
+  export let node = {}
+  let defaultProps = {
+    name: 'Store',
+    type: 'store',
+    color: 'white',
+    fill: 'transparent',
+    size: {width: 100, height: 50},
+    location: {x: 0, y: 0}
   }
+  let {location, size, id, type, name, color, fill} = {...defaultProps, ...node}
+  console.log(node)
 
   function handleDragStart(e) {
     console.log(e)
-    currentNode.location = {x: e.offsetX, y: e.offsetY}
-    startDrag(currentNode)
+    node.location = {x: e.offsetX, y: e.offsetY}
+    startDrag(node)
   }
 
   function handleDragEnd(e) {
     if ($dropStatus === 'dropped') return
     endDrag({type})
+    updateNode(node)
   }
 
   function handleSelect() {
-    selectNode(currentNode)
+    selectNode(node)
   }
 
   const textHeight = 12
@@ -46,7 +50,6 @@
     bottom: location.y + size.height - padding,
   }
 
-  let node
   let sx, sy
 
   function handleMouseDownNode(e) {
@@ -56,7 +59,7 @@
     sy = e.pageY - location.y
     window.addEventListener('mousemove', handleMouseMoveNode)
     window.addEventListener('mouseup', handleMouseUpNode)
-    selectNode(currentNode)
+    selectNode(node)
   }
 
   function handleMouseMoveNode(e) {
@@ -65,7 +68,8 @@
   }
 
   function handleMouseUpNode(e) {
-    selectNode(currentNode)
+    selectNode(node)
+    updateNode(node)
     window.removeEventListener('mousemove', handleMouseMoveNode)
     window.removeEventListener('mouseup', handleMouseUpNode)
   }
@@ -80,6 +84,12 @@
   }
 
   $: size.width = Math.min(Math.max(100, (name.length + 1) * 10 + padding), 250)
+
+  function endInputName() {
+    inputNameMode = false
+    console.log(name)
+    updateNode({...node, name})
+  }
 
 </script>
 
@@ -103,7 +113,6 @@
 
     <g on:mousedown={handleMouseDownNode}
        on:dblclick={handleDblClickNode}
-       bind:this={node}
        style="opacity:.9; clip-path: url(#clipPath_{id});"
     >
         <rect
@@ -145,8 +154,8 @@
               bind:value={name}
               type="text"
               class="node-name-input"
-              on:keypress={e => inputNameMode = e.key !== 'Enter'}
-              on:blur={() => inputNameMode = false}
+              on:keypress={e => e.key === 'Enter' && endInputName()}
+              on:blur={endInputName}
               style="color: {color}"
             />
         </foreignObject>

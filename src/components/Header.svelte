@@ -1,8 +1,14 @@
 <script>
+  import {load} from '../models/model/init'
+  import {save} from '../models/model'
 </script>
 
 <header>
-    Effector composer
+    <div>Effector composer</div>
+    <div>
+        <button on:click={load}>Load</button>
+        <button on:click={save}>Save</button>
+    </div>
 </header>
 
 <style>
@@ -17,5 +23,8 @@
         background: darkslategray;
         z-index: 10;
         font-weight: bold;
+
+        display: flex;
+        justify-content: space-between;
     }
 </style>
