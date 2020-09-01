@@ -2,15 +2,9 @@
   import {tick} from 'svelte'
   import {endDrag, startDrag, selectNode} from '../../models/view'
   import {dropStatus} from '../../models/view/state'
-  import {updateNode} from '../../models/model'
+  import {startTmpConnect, updateNode, updateTmpConnect} from '../../models/model'
 
 
-  // export let type
-  // export let name
-  // export let color = 'white'
-  // export let fill = 'transparent'
-  // export let location = {x: 0, y: 0}
-  // export let size = {width: 100, height: 50}
   export let mode = 'dom'
   export let node = {}
   let defaultProps = {
@@ -18,11 +12,10 @@
     type: 'store',
     color: 'white',
     fill: 'transparent',
-    size: {width: 100, height: 50},
+    size: {width: 100, height: 22},
     location: {x: 0, y: 0},
   }
   let {location, size, id, type, name, color, fill} = {...defaultProps, ...node}
-  console.log(node)
 
   function handleDragStart(e) {
     console.log(e)
@@ -48,6 +41,8 @@
     top: location.y + padding,
     right: location.x + size.width - padding,
     bottom: location.y + size.height - padding,
+    padding,
+    textHeight,
   }
 
   let sx, sy
@@ -83,7 +78,7 @@
     nodeName.focus()
   }
 
-  $: size.width = Math.min(Math.max(100, (name.length + 1) * 10 + padding), 250)
+  $: size.width = Math.min(Math.max(100, (name.length + 2) * 10 + padding), 250)
 
   function endInputName() {
     inputNameMode = false
@@ -94,9 +89,11 @@
   let scx, scy, dcx, dcy, connecting = false
 
   function startConnect(e) {
+    if (e.button !== 0) return
     connecting = true
-    scx = dcx = e.offsetX
-    scy = dcy = e.offsetY
+    scx = dcx = bound.right - padding
+    scy = dcy = bound.top + padding
+    startTmpConnect({scx, scy, dcx, dcy, node})
     window.addEventListener('mousemove', moveConnect)
     window.addEventListener('mouseup', endConnect)
   }
@@ -104,9 +101,11 @@
   function moveConnect(e) {
     dcx = e.offsetX
     dcy = e.offsetY
+    updateTmpConnect({scx, scy, dcx, dcy, node})
   }
 
   function endConnect(e) {
+    if (e.button !== 0) return
     connecting = false
     window.removeEventListener('mousemove', moveConnect)
     window.removeEventListener('mouseup', endConnect)
@@ -125,63 +124,71 @@
     >
         {name}
     </div>
-{:else}
+{:else if mode === 'svg'}
     <defs>
         <clipPath id="clipPath_{id}">
             <rect {...location} {...size} />
         </clipPath>
     </defs>
 
+    <defs>
+        <clipPath id="clipPath_name_{id}">
+            <rect x={bound.left} y={bound.top} width={bound.right - bound.left - padding * 3} height={textHeight} />
+        </clipPath>
+    </defs>
+
     <g on:mousedown={handleMouseDownNode}
        on:dblclick={handleDblClickNode}
-       style="opacity:.9; clip-path: url(#clipPath_{id});"
+       style="opacity:.9;"
     >
-        <rect
-          {...location}
-          {...size}
-          {fill}
-          stroke="gray"
-          rx="5" ry="5"
-        />
-        {#if !inputNameMode}
-            <text
-              x={bound.left}
-              y={bound.top + textHeight}
-              fill={color}
-              font-family="monospace"
-            >
-                {name}
-            </text>
-        {/if}
-        <line
-          x1={bound.left - padding}
-          y1={bound.top + textHeight + padding}
-          x2={bound.right + padding}
-          y2={bound.top+ textHeight + padding}
-          stroke={color}
-        />
-        <circle
-          cx={bound.right - padding}
-          cy={bound.top + padding}
-          r={padding}
-          stroke="white"
-          fill="green"
-          class="node-output"
-          on:mousedown|stopPropagation={startConnect}
-        />
+        <g style="clip-path: url(#clipPath_{id});">
+            <rect
+              {...location}
+              {...size}
+              {fill}
+              stroke="gray"
+              rx="5" ry="5"
+            />
+            {#if !inputNameMode}
+                <text
+                  x={bound.left}
+                  y={bound.top + textHeight}
+                  fill={color}
+                  font-family="monospace"
+                  style="clip-path: url(#clipPath_name_{id});"
+                >
+                    {name}
+                </text>
+            {/if}
+            <circle
+              cx={bound.right - padding}
+              cy={bound.top + padding + 1}
+              r={padding}
+              stroke="white"
+              fill="green"
+              class="node-output"
+              on:mousedown|stopPropagation={startConnect}
+              on:mouseup|stopPropagation={startConnect}
+            />
+            <line
+              x1={bound.right - padding * 3}
+              y1={bound.top - padding}
+              x2={bound.right - padding * 3}
+              y2={bound.top + padding + textHeight}
+              stroke={color}
+              style="opacity: .5;"
+            />
+            <line
+              x1={location.x}
+              y1={bound.top + padding + textHeight}
+              x2={location.x + size.width}
+              y2={bound.top + padding + textHeight}
+              stroke={color}
+              style="opacity: .5;"
+            />
+        </g>
+        <slot {bound} {size} {location} {node} />
     </g>
-
-    {#if connecting}
-        <line
-          x1={scx}
-          y1={scy}
-          x2={dcx}
-          y2={dcy}
-          stroke="mediumseagreen"
-          fill="white"
-          stroke-width="4"
-        />
-    {/if}
 
     {#if inputNameMode}
         <foreignObject

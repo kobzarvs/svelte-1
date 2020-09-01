@@ -6,7 +6,7 @@
     type: 'component',
     name: 'Component',
     fill: '#edf4f6',
-    color: '#333',
+    color: '#555',
   }
 </script>
 

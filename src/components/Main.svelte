@@ -7,6 +7,7 @@
   import Event from './nodes/Event.svelte'
   import Module from './nodes/Module.svelte'
   import Component from './nodes/Component.svelte'
+  import {tmpConnect} from '../models/model/state'
 
 
   const components = {
@@ -18,6 +19,7 @@
 
   let main
   let size = $svgSize
+
   function handleDrop(e) {
     drop({
       x: e.offsetX - $selectedNode.location.x,
@@ -40,6 +42,19 @@
               node={node}
             />
         {/each}
+
+
+        {#if $tmpConnect}
+            <line
+              x1={$tmpConnect.scx}
+              y1={$tmpConnect.scy}
+              x2={$tmpConnect.dcx}
+              y2={$tmpConnect.dcy}
+              stroke="red"
+              fill="white"
+              stroke-width="4"
+            />
+        {/if}
     </svg>
 </main>
 
